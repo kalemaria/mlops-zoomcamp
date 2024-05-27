@@ -23,21 +23,19 @@ def load_pickle(filename: str):
 )
 def run_train(data_path: str):
 
-    with mlflow.start_run():
+    mlflow.sklearn.autolog()
 
-        X_train, y_train = load_pickle(os.path.join(data_path, "train.pkl"))
-        X_val, y_val = load_pickle(os.path.join(data_path, "val.pkl"))
+    X_train, y_train = load_pickle(os.path.join(data_path, "train.pkl"))
+    X_val, y_val = load_pickle(os.path.join(data_path, "val.pkl"))
 
-        rf = RandomForestRegressor(max_depth=10, random_state=0)
-        rf.fit(X_train, y_train)
+    rf = RandomForestRegressor(max_depth=10, random_state=0)
+    rf.fit(X_train, y_train)
 
-        min_samples_split = rf.get_params()['min_samples_split']
-        mlflow.log_param("min_samples_split", min_samples_split)
+    min_samples_split = rf.get_params()['min_samples_split']
 
-        y_pred = rf.predict(X_val)
+    y_pred = rf.predict(X_val)
 
-        rmse = root_mean_squared_error(y_val, y_pred)
-        mlflow.log_metric("rmse", rmse)
+    rmse = root_mean_squared_error(y_val, y_pred)
 
 if __name__ == '__main__':
     run_train()
