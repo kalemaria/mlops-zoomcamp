@@ -8,6 +8,9 @@ from hyperopt.pyll import scope
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import root_mean_squared_error
 
+# Before running this script, run in the terminal:
+# mlflow server --backend-store-uri sqlite:///backend.db  --default-artifact-root ./artifacts
+
 mlflow.set_tracking_uri("http://127.0.0.1:5000")
 mlflow.set_experiment("random-forest-hyperopt")
 
