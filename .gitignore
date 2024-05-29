@@ -162,5 +162,5 @@ cython_debug/
 # Data, output and mlflow DB files
 data/
 output/
-mlflow*.db
+*.db
 mlruns/
