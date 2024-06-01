@@ -166,3 +166,6 @@ output/
 mlruns/
 artifacts/
 models/
+
+# Lecture files
+*.pdf
