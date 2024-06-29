@@ -169,3 +169,6 @@ models/
 
 # Lecture files
 *.pdf
+
+# venv files
+mlops-venv/
