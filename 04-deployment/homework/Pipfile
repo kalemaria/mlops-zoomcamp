@@ -5,7 +5,9 @@ name = "pypi"
 
 [packages]
 scikit-learn = "==1.5.0"
-flask = "*"
+pandas = "*"
+pyarrow = "*"
+click = "*"
 
 [dev-packages]
 

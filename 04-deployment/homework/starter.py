@@ -51,7 +51,6 @@ def write_result(df_result, filename):
         compression=None,
         index=False
 )
-# The size of the output file is 68.6M ~66M
 
 @click.command()
 @click.option('--year', required=True, help='Validation year in YYYY format')
