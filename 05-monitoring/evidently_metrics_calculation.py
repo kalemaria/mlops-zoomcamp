@@ -13,7 +13,7 @@ from prefect import task, flow
 
 from evidently.report import Report
 from evidently import ColumnMapping
-from evidently.metrics import ColumnDriftMetric, DatasetDriftMetric, DatasetMissingValuesMetric
+from evidently.metrics import ColumnDriftMetric, DatasetDriftMetric, DatasetMissingValuesMetric, ConflictPredictionMetric, ColumnQuantileMetric
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]: %(message)s")
 
@@ -21,12 +21,14 @@ SEND_TIMEOUT = 10
 rand = random.Random()
 
 create_table_statement = """
-drop table if exists dummy_metrics;
-create table dummy_metrics(
+drop table if exists metrics;
+create table metrics(
 	timestamp timestamp,
 	prediction_drift float,
 	num_drifted_columns integer,
-	share_missing_values float
+	share_missing_values float,
+	number_not_stable_prediction integer,
+	median_fare_amount float
 )
 """
 
@@ -34,9 +36,9 @@ reference_data = pd.read_parquet('data/reference.parquet')
 with open('models/lin_reg.bin', 'rb') as f_in:
 	model = joblib.load(f_in)
 
-raw_data = pd.read_parquet('data/green_tripdata_2022-02.parquet')
+raw_data = pd.read_parquet('data/green_tripdata_2024-03.parquet')
 
-begin = datetime.datetime(2022, 2, 1, 0, 0)
+begin = datetime.datetime(2024, 3, 1, 0, 0)
 num_features = ['passenger_count', 'trip_distance', 'fare_amount', 'total_amount']
 cat_features = ['PULocationID', 'DOLocationID']
 column_mapping = ColumnMapping(
@@ -49,7 +51,9 @@ column_mapping = ColumnMapping(
 report = Report(metrics = [
     ColumnDriftMetric(column_name='prediction'),
     DatasetDriftMetric(),
-    DatasetMissingValuesMetric()
+    DatasetMissingValuesMetric(),
+    ConflictPredictionMetric(),
+    ColumnQuantileMetric(column_name='fare_amount', quantile=0.5)
 ])
 
 @task
@@ -62,7 +66,7 @@ def prep_db():
 			conn.execute(create_table_statement)
 
 @task
-def calculate_metrics_postgresql(curr, i):
+def calculate_metrics_postgresql(curr, i): # select data for day number i
 	current_data = raw_data[(raw_data.lpep_pickup_datetime >= (begin + datetime.timedelta(i))) &
 		(raw_data.lpep_pickup_datetime < (begin + datetime.timedelta(i + 1)))]
 
@@ -77,18 +81,20 @@ def calculate_metrics_postgresql(curr, i):
 	prediction_drift = result['metrics'][0]['result']['drift_score']
 	num_drifted_columns = result['metrics'][1]['result']['number_of_drifted_columns']
 	share_missing_values = result['metrics'][2]['result']['current']['share_of_missing_values']
+	number_not_stable_prediction = result['metrics'][3]['result']['current']['number_not_stable_prediction']
+	median_fare_amount = result['metrics'][4]['result']['current']['value']
 
 	curr.execute(
-		"insert into dummy_metrics(timestamp, prediction_drift, num_drifted_columns, share_missing_values) values (%s, %s, %s, %s)",
-		(begin + datetime.timedelta(i), prediction_drift, num_drifted_columns, share_missing_values)
+		"insert into metrics(timestamp, prediction_drift, num_drifted_columns, share_missing_values, number_not_stable_prediction, median_fare_amount) values (%s, %s, %s, %s, %s, %s)",
+		(begin + datetime.timedelta(i), prediction_drift, num_drifted_columns, share_missing_values, number_not_stable_prediction, median_fare_amount)
 	)
 
 @flow
-def batch_monitoring_backfill():
+def batch_monitoring_backfill(): # every 10 seconds, write data for one day
 	prep_db()
 	last_send = datetime.datetime.now() - datetime.timedelta(seconds=10)
 	with psycopg.connect("host=localhost port=5432 dbname=test user=postgres password=example", autocommit=True) as conn:
-		for i in range(0, 27):
+		for i in range(0, 31):
 			with conn.cursor() as curr:
 				calculate_metrics_postgresql(curr, i)
 
