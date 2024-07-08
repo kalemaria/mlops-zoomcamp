@@ -1,0 +1,7 @@
+services:
+  localstack:
+    image: localstack/localstack:latest  # Use the latest LocalStack image
+    ports:
+      - "4566:4566"  # Forward port 4566 for LocalStack services
+    environment:
+      - SERVICES=s3  # Specify only the S3 service
