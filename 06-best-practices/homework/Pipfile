@@ -8,6 +8,8 @@ scikit-learn = "==1.5.0"
 pandas = "*"
 pyarrow = "*"
 s3fs = "*"
+awscli = "*"
+awscli-local = "*"
 
 [dev-packages]
 pytest = "*"
