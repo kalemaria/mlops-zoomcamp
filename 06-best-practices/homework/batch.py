@@ -6,7 +6,20 @@ import pandas as pd
 import os
 
 def read_data(filename:str):
-    df = pd.read_parquet(filename)
+    # check if S3_ENDPOINT_URL is set, and if it is, use it for reading
+    S3_ENDPOINT_URL = os.getenv('S3_ENDPOINT_URL')
+    if S3_ENDPOINT_URL is not None:
+        print(f"Reading {filename} from Lockalstack S3 at {S3_ENDPOINT_URL}...")
+        options = {
+            'client_kwargs': {
+                'endpoint_url': S3_ENDPOINT_URL
+            }
+        }
+        df = pd.read_parquet(filename, storage_options=options)
+    #otherwise use the usual way
+    else:
+        print(f"Reading {filename} from the actual S3 service...")
+        df = pd.read_parquet(filename)
 
     return df
 
@@ -33,7 +46,9 @@ def get_output_path(year, month):
 def main(year:int, month:int):
 
     input_file = get_input_path(year, month)
+    print(f"Input file: {input_file}")
     output_file = get_output_path(year, month)
+    print(f"Output file: {output_file}")
     categorical = ['PULocationID', 'DOLocationID']
 
     with open('model.bin', 'rb') as f_in:
