@@ -19,7 +19,7 @@ refactor it. We'll start by getting rid of all the global variables.
 
 Now we need to create the "main" block from which we'll invoke
 the main function. How does the `if` statement that we use for
-this looks like? 
+this looks like? -> `if __name__ == "__main__":`
 
 
 Hint: after refactoring, check that the code still works. Just run it e.g. for March 2023 and see if it finishes successfully. 
@@ -249,7 +249,7 @@ df_input.to_parquet(
 
 What's the size of the file?
 
-* 3620
+* 3620 <-
 * 23620
 * 43620
 * 63620
@@ -258,6 +258,11 @@ Note: it's important to use the code from the snippet for saving
 the file. Otherwise the size may be different depending on the OS,
 engine and compression. Even if you use this exact snippet, the size
 of your dataframe may still be a bit off. Just select the closest option.
+
+This is how I checked it:
+```bash
+awslocal s3 ls s3://nyc-duration --recursive --endpoint-url http://localhost:4566
+```
 
 
 ## Q6. Finish the integration test
