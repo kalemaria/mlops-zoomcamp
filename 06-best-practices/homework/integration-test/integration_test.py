@@ -4,14 +4,17 @@ import os
 import sys
 sys.path.append("..")  # Add parent directory to path
 
-from batch import get_input_path
+from batch import get_input_path, get_output_path, save_data, read_data
 from tests.test_batch import dt
 
 def main(year:int, month:int):
 
     input_file = get_input_path(year, month)
+    print(f"Input file: {input_file}")
+    output_file = get_output_path(year, month)
+    print(f"Output file: {output_file}")
 
-    # Create a dataframe:
+    # Create a dataframe with fake data:
     input_data = [
         (None, None, dt(1, 1), dt(1, 10)),
         (1, 1, dt(1, 2), dt(1, 10)),
@@ -22,28 +25,18 @@ def main(year:int, month:int):
     df_input = pd.DataFrame(input_data, columns=input_columns)
 
     # save it:
-    S3_ENDPOINT_URL = os.getenv('S3_ENDPOINT_URL')
-    if S3_ENDPOINT_URL is not None:
-        options = {
-            'client_kwargs': {
-                'endpoint_url': S3_ENDPOINT_URL
-            }
-        }
+    save_data(df_input, input_file)
+  
+    # Run the batch.py script for the fake data:
+    os.system('python ../batch.py')
 
-        df_input.to_parquet(
-            input_file,
-            engine='pyarrow',
-            compression=None,
-            index=False,
-            storage_options=options
-        )
-    else:
-        df_input.to_parquet(
-            input_file,
-            engine='pyarrow',
-            compression=None,
-            index=False
-        )
+    # Read the output data and verify the result is correct:
+    df_output = read_data(output_file)
+    print(df_output)
+    sum_predicted_durations = df_output.predicted_duration.sum()
+    print(f'Sum of predicted durations: {sum_predicted_durations}')
+
+    assert round(sum_predicted_durations, 2) == 36.28
 
 if __name__ == "__main__":
     main(2023, 1)
