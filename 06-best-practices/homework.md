@@ -286,7 +286,7 @@ verify the result is correct.
 What's the sum of predicted durations for the test dataframe?
 
 * 13.08
-* 36.28
+* 36.28 <-
 * 69.28
 * 81.08
 
@@ -298,6 +298,10 @@ that.
 
 Let's do that!
 
+TODO. For now, don't forget to run in the end:
+```bash
+docker-compose down
+```
 
 ## Submit the results
 
