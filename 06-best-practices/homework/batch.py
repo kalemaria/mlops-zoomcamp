@@ -3,6 +3,7 @@
 
 import pickle
 import pandas as pd
+import os
 
 def read_data(filename:str):
     df = pd.read_parquet(filename)
@@ -19,10 +20,20 @@ def prepare_data(df: pd.DataFrame, categorical:list):
 
     return df
 
-def main(year:int, month:int, categorical:list=['PULocationID', 'DOLocationID']):
+def get_input_path(year, month):
+    default_input_pattern = 'https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{year:04d}-{month:02d}.parquet'
+    input_pattern = os.getenv('INPUT_FILE_PATTERN', default_input_pattern)
+    return input_pattern.format(year=year, month=month)
 
-    input_file = f'https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{year:04d}-{month:02d}.parquet'
-    output_file = f'output/taxi_type=yellow_year={year:04d}_month={month:02d}.parquet'
+def get_output_path(year, month):
+    default_output_pattern = 's3://nyc-duration-prediction-alexey/taxi_type=fhv/year={year:04d}/month={month:02d}/predictions.parquet'
+    output_pattern = os.getenv('OUTPUT_FILE_PATTERN', default_output_pattern)
+    return output_pattern.format(year=year, month=month)
+
+def main(year:int, month:int):
+
+    input_file = get_input_path(year, month)
+    output_file = get_output_path(year, month)
     categorical = ['PULocationID', 'DOLocationID']
 
     with open('model.bin', 'rb') as f_in:
