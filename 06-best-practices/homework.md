@@ -42,7 +42,7 @@ pipenv install --dev pytest
 Next, create a folder `tests` and create two files. One will be
 the file with tests. We can name it `test_batch.py`. 
 
-What should be the other file? 
+What should be the other file? -> `__init__.py`
 
 Hint: to be able to test `batch.py`, we need to be able to
 import it. Without this other file, we won't be able to do it.
@@ -96,7 +96,7 @@ The same is true for Pandas Series. Also, a DataFrame could be turned into a lis
 How many rows should be there in the expected dataframe?
 
 * 1
-* 2
+* 2 <-
 * 3
 * 4
 
@@ -131,6 +131,20 @@ In both cases we should adjust commands for localstack. What option do we need t
 * `--profile`
 * `--endpoint-url`
 * `--version`
+
+My solution:
+```bash
+conda activate
+cd integration-test
+docker-compose up -d
+
+# install AWS CLI packages (only once):
+pienv install awscli awscli-local
+
+pipenv shell
+awslocal s3 mb s3://nyc-duration --endpoint-url http://localhost:4566
+awslocal s3 ls --endpoint-url http://localhost:4566
+```
 
 
 ## Make input and output paths configurable
