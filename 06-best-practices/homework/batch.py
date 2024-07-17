@@ -24,7 +24,7 @@ def read_data(filename:str):
         print(f"Reading {filename} from Lockalstack S3 at {S3_ENDPOINT_URL}...")
         options = {
             'client_kwargs': {
-                'endpoint_url': S3_ENDPOINT_URL
+                'endpoint_url': S3_ENDPOINT_URL,
             }
         }
         df = pd.read_parquet(filename, storage_options=options)
@@ -53,7 +53,7 @@ def save_data(df:pd.DataFrame, filename:str):
         print(f"Saving the dataframe to Lockalstack S3 at {S3_ENDPOINT_URL} as {filename}...")
         options = {
             'client_kwargs': {
-                'endpoint_url': S3_ENDPOINT_URL
+                'endpoint_url': S3_ENDPOINT_URL,
             }
         }
         
@@ -71,7 +71,7 @@ def save_data(df:pd.DataFrame, filename:str):
             filename,
             engine='pyarrow',
             compression=None,
-            index=False
+            index=False,
         )
 
 def main(year:int, month:int):
