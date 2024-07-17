@@ -2,31 +2,45 @@ from datetime import datetime
 import pandas as pd
 import batch
 
+
 def dt(hour, minute, second=0):
     return datetime(2023, 1, 1, hour, minute, second)
 
+
 def generate_fake_input():
-    #pylint:disable=line-too-long
     input_data = [
         (None, None, dt(1, 1), dt(1, 10)),
         (1, 1, dt(1, 2), dt(1, 10)),
         (1, None, dt(1, 2, 0), dt(1, 2, 59)),
-        (3, 4, dt(1, 2, 0), dt(2, 2, 1)) 
+        (3, 4, dt(1, 2, 0), dt(2, 2, 1)),
     ]
-    input_columns = ['PULocationID', 'DOLocationID', 'tpep_pickup_datetime', 'tpep_dropoff_datetime']
+    input_columns = [
+        'PULocationID',
+        'DOLocationID',
+        'tpep_pickup_datetime',
+        'tpep_dropoff_datetime',
+    ]
     input_df = pd.DataFrame(input_data, columns=input_columns)
     return input_df
 
-def test_prepare_data():
-    #pylint:disable=line-too-long
 
+def test_prepare_data():
     expected_data = [
         ('-1', '-1', dt(1, 1), dt(1, 10), 9.0),
         ('1', '1', dt(1, 2), dt(1, 10), 8.0),
     ]
-    expected_columns = ['PULocationID', 'DOLocationID', 'tpep_pickup_datetime', 'tpep_dropoff_datetime', 'duration']
+    expected_columns = [
+        'PULocationID',
+        'DOLocationID',
+        'tpep_pickup_datetime',
+        'tpep_dropoff_datetime',
+        'duration',
+    ]
     expected_df = pd.DataFrame(expected_data, columns=expected_columns)
 
-    actual_df = batch.prepare_data(df=generate_fake_input(), categorical=['PULocationID', 'DOLocationID'])
+    actual_df = batch.prepare_data(
+        df=generate_fake_input(),
+        categorical=['PULocationID', 'DOLocationID'],
+    )
 
-    assert actual_df.equals(expected_df)  
+    assert actual_df.equals(expected_df)

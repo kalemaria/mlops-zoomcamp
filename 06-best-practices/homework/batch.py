@@ -5,19 +5,22 @@ import os
 import pickle
 import pandas as pd
 
+
 def get_input_path(year, month):
-    #pylint:disable=line-too-long
+    # pylint:disable=line-too-long
     default_input_pattern = 'https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{year:04d}-{month:02d}.parquet'
     input_pattern = os.getenv('INPUT_FILE_PATTERN', default_input_pattern)
     return input_pattern.format(year=year, month=month)
 
+
 def get_output_path(year, month):
-    #pylint:disable=line-too-long
+    # pylint:disable=line-too-long
     default_output_pattern = 's3://nyc-duration-prediction-alexey/taxi_type=fhv/year={year:04d}/month={month:02d}/predictions.parquet'
     output_pattern = os.getenv('OUTPUT_FILE_PATTERN', default_output_pattern)
     return output_pattern.format(year=year, month=month)
 
-def read_data(filename:str):
+
+def read_data(filename: str):
     # check if S3_ENDPOINT_URL is set, and if it is, use it for reading
     S3_ENDPOINT_URL = os.getenv('S3_ENDPOINT_URL')
     if S3_ENDPOINT_URL is not None:
@@ -28,14 +31,15 @@ def read_data(filename:str):
             }
         }
         df = pd.read_parquet(filename, storage_options=options)
-    #otherwise use the usual way
+    # otherwise use the usual way
     else:
         print(f"Reading {filename} from the actual S3 service...")
         df = pd.read_parquet(filename)
 
     return df
 
-def prepare_data(df: pd.DataFrame, categorical:list):
+
+def prepare_data(df: pd.DataFrame, categorical: list):
     df['duration'] = df.tpep_dropoff_datetime - df.tpep_pickup_datetime
     df['duration'] = df.duration.dt.total_seconds() / 60
 
@@ -46,7 +50,8 @@ def prepare_data(df: pd.DataFrame, categorical:list):
 
     return df
 
-def save_data(df:pd.DataFrame, filename:str):
+
+def save_data(df: pd.DataFrame, filename: str):
     S3_ENDPOINT_URL = os.getenv('S3_ENDPOINT_URL')
     # check if S3_ENDPOINT_URL is set, and if it is, use it for saving
     if S3_ENDPOINT_URL is not None:
@@ -56,13 +61,13 @@ def save_data(df:pd.DataFrame, filename:str):
                 'endpoint_url': S3_ENDPOINT_URL,
             }
         }
-        
+
         df.to_parquet(
             filename,
             engine='pyarrow',
             compression=None,
             index=False,
-            storage_options=options
+            storage_options=options,
         )
     # otherwise use the usual way
     else:
@@ -74,13 +79,14 @@ def save_data(df:pd.DataFrame, filename:str):
             index=False,
         )
 
-def main(year:int, month:int):
+
+def main(year: int, month: int):
 
     # Change directory to the directory of this script, so that the model file is found:
     script_path = os.path.abspath(__file__)
     os.chdir(os.path.dirname(script_path))
-    #current_dir = os.getcwd()
-    #print(f"The current working directory is: {current_dir}")
+    # current_dir = os.getcwd()
+    # print(f"The current working directory is: {current_dir}")
 
     input_file = get_input_path(year, month)
     print(f"Input file: {input_file}")
@@ -106,6 +112,7 @@ def main(year:int, month:int):
     df_result['predicted_duration'] = y_pred
 
     save_data(df_result, output_file)
+
 
 if __name__ == "__main__":
     main(2023, 1)
