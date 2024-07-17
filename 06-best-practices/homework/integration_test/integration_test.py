@@ -5,7 +5,7 @@ import sys
 
 sys.path.append("..")  # Add parent directory to path
 
-from batch import get_input_path, get_output_path, save_data, read_data
+from batch import get_input_path, get_output_path, read_data, save_data
 from tests.test_batch import generate_fake_input
 
 
