@@ -1,11 +1,12 @@
+# pylint: disable=wrong-import-position
+
 import os
 import sys
-import pandas as pd
-
-from batch import get_input_path, get_output_path, save_data, read_data
-from tests.test_batch import dt
 
 sys.path.append("..")  # Add parent directory to path
+
+from batch import get_input_path, get_output_path, save_data, read_data
+from tests.test_batch import generate_fake_input
 
 def main(year:int, month:int):
     #pylint:disable=line-too-long
@@ -13,22 +14,12 @@ def main(year:int, month:int):
     print(f"Input file: {input_file}")
     output_file = get_output_path(year, month)
     print(f"Output file: {output_file}")
-    print(f"Input file: {input_file}")
-    output_file = get_output_path(year, month)
-    print(f"Output file: {output_file}")
 
     # Create a dataframe with fake data:
-    input_data = [
-        (None, None, dt(1, 1), dt(1, 10)),
-        (1, 1, dt(1, 2), dt(1, 10)),
-        (1, None, dt(1, 2, 0), dt(1, 2, 59)),
-        (3, 4, dt(1, 2, 0), dt(2, 2, 1))    
-    ]
-    input_columns = ['PULocationID', 'DOLocationID', 'tpep_pickup_datetime', 'tpep_dropoff_datetime']
-    df_input = pd.DataFrame(input_data, columns=input_columns)
+    input_df = generate_fake_input()
 
     # save it:
-    save_data(df_input, input_file)
+    save_data(input_df, input_file)
   
     # Run the batch.py script for the fake data:
     os.system('python ../batch.py')

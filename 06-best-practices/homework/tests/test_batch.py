@@ -5,7 +5,7 @@ import batch
 def dt(hour, minute, second=0):
     return datetime(2023, 1, 1, hour, minute, second)
 
-def test_prepare_data():
+def generate_fake_input():
     #pylint:disable=line-too-long
     input_data = [
         (None, None, dt(1, 1), dt(1, 10)),
@@ -15,6 +15,10 @@ def test_prepare_data():
     ]
     input_columns = ['PULocationID', 'DOLocationID', 'tpep_pickup_datetime', 'tpep_dropoff_datetime']
     input_df = pd.DataFrame(input_data, columns=input_columns)
+    return input_df
+
+def test_prepare_data():
+    #pylint:disable=line-too-long
 
     expected_data = [
         ('-1', '-1', dt(1, 1), dt(1, 10), 9.0),
@@ -23,6 +27,6 @@ def test_prepare_data():
     expected_columns = ['PULocationID', 'DOLocationID', 'tpep_pickup_datetime', 'tpep_dropoff_datetime', 'duration']
     expected_df = pd.DataFrame(expected_data, columns=expected_columns)
 
-    actual_df = batch.prepare_data(df=input_df, categorical=['PULocationID', 'DOLocationID'])
+    actual_df = batch.prepare_data(df=generate_fake_input(), categorical=['PULocationID', 'DOLocationID'])
 
     assert actual_df.equals(expected_df)  
