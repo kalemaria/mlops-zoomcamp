@@ -1,16 +1,18 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import os
 import pickle
 import pandas as pd
-import os
 
 def get_input_path(year, month):
+    #pylint:disable=line-too-long
     default_input_pattern = 'https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{year:04d}-{month:02d}.parquet'
     input_pattern = os.getenv('INPUT_FILE_PATTERN', default_input_pattern)
     return input_pattern.format(year=year, month=month)
 
 def get_output_path(year, month):
+    #pylint:disable=line-too-long
     default_output_pattern = 's3://nyc-duration-prediction-alexey/taxi_type=fhv/year={year:04d}/month={month:02d}/predictions.parquet'
     output_pattern = os.getenv('OUTPUT_FILE_PATTERN', default_output_pattern)
     return output_pattern.format(year=year, month=month)
@@ -39,7 +41,8 @@ def prepare_data(df: pd.DataFrame, categorical:list):
 
     df = df[(df.duration >= 1) & (df.duration <= 60)].copy()
 
-    df[categorical] = df[categorical].fillna(-1).astype('int').astype('str') # Ensures the final data type is string
+    # Ensures the final data type is string
+    df[categorical] = df[categorical].fillna(-1).astype('int').astype('str')
 
     return df
 

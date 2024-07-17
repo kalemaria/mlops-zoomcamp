@@ -1,8 +1,9 @@
-[tool.pylint,messages_control]
+[tool.pylint.messages_control]
 
 disable = [
     "missing-function-docstring",
     "missing-module-docstring",
     "missing-class-docstring",
-    "missing-final-newline"
+    "missing-final-newline",
+    "invalid-name"
 ]
