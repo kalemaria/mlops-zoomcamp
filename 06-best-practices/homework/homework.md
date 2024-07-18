@@ -139,7 +139,7 @@ cd integration-test
 docker-compose up -d
 
 # install AWS CLI packages (only once):
-pienv install awscli awscli-local
+pipenv install awscli awscli-local
 
 pipenv shell
 awslocal s3 mb s3://nyc-duration --endpoint-url http://localhost:4566
@@ -219,7 +219,6 @@ Also, we need to download the input file and copy it to the local S3 bucket:
 mkdir input
 wget https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-03.parquet -P input
 awslocal s3 cp input/yellow_tripdata_2023-03.parquet s3://nyc-duration/in/2023-03.parquet --endpoint-url http://localhost:4566
-upload: input/yellow_tripdata_2023-03.parquet to s3://nyc-duration/in/2023-03.parquet
 ```
 
 ## Q5. Creating test data
